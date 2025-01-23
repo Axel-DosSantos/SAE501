@@ -25,7 +25,7 @@ import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FoodScreen(navController: NavController) {
+fun FoodScreen(navController: NavController, userName: String) {
     var selectedItem by remember { mutableIntStateOf(1) }
     val items = listOf(
         NavigationItem("Home", Icons.Rounded.Home),
@@ -104,7 +104,7 @@ fun FoodScreen(navController: NavController) {
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            text = "Hi Axel",
+                            text = "Hi $userName",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,

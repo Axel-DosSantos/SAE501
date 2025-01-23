@@ -30,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.uiux.*
 
@@ -55,22 +56,22 @@ data class NavigationItem(
 )
 
 @Composable
-fun MyAppNavHost(navController: NavHostController = rememberNavController()) {
+fun MyAppNavHost(navController: NavHostController = rememberNavController(), userViewModel: UserViewModel = viewModel()) {
     val context = LocalContext.current
     val isFirstLaunch = remember { context.isFirstLaunch() }
 
     NavHost(navController, startDestination = if (isFirstLaunch) "login" else "main") {
         composable("login") { LoginPage(navController) }
-        composable("questionnaire") { QuestionnaireScreen(navController) }
+        composable("questionnaire") { QuestionnaireScreen(navController, userViewModel) }
         composable("additionalInfo") { AdditionalInfoScreen(navController) }
-        composable("main") { MainScreen(navController) }
+        composable("main") { MainScreen(navController, userViewModel.userName) }
         composable("home") { MainActivity() }
-        composable("food") { FoodScreen(navController) }
+        composable("food") { FoodScreen(navController, userViewModel.userName) }
     }
 }
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, userName: String) {
     var selectedItem by remember { mutableStateOf(0) }
     val items = listOf(
         NavigationItem("Home", Icons.Rounded.Home),
@@ -148,7 +149,7 @@ fun MainScreen(navController: NavHostController) {
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            text = "Hi Axel",
+                            text = "Hi $userName",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
@@ -300,4 +301,15 @@ fun Context.isFirstLaunch(): Boolean {
         sharedPreferences.edit().putBoolean("is_first_launch", false).apply()
     }
     return isFirstLaunch
+}
+
+// Affichage dynamique du nom de l'utilisateur
+fun Context.saveUserName(userName: String) {
+    val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    sharedPreferences.edit().putString("user_name", userName).apply()
+}
+
+fun Context.getUserName(): String {
+    val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    return sharedPreferences.getString("user_name", "") ?: ""
 }
