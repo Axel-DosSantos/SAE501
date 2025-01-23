@@ -30,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
+import com.example.myapplication.uiux.FoodScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.uiux.*
 

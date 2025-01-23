@@ -65,8 +65,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-test-manifest:1.7.5")
     implementation("androidx.compose.ui:ui-test-junit4:1.7.5")
     implementation("androidx.compose.ui:ui-test:1.7.5")
-    implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
-    implementation("androidx.compose.material:material:1.0.0")
 
     // Navigation dependencies
     implementation("androidx.navigation:navigation-compose:2.5.0")
@@ -75,8 +73,15 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:1.7.5")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
 
+// Retrofit et Gson
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0" ) // Retrofit
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")  // Gson Converter
 
+    // Kotlin Coroutines (si vous utilisez les suspending functions)
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
 
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
     // Test dependencies
     testImplementation(libs.junit)
