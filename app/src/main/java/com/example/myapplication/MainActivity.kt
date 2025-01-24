@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.RestaurantMenu
@@ -23,6 +24,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -30,9 +32,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
-import com.example.myapplication.uiux.FoodScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.uiux.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +54,8 @@ class MainActivity : ComponentActivity() {
 
 data class NavigationItem(
     val title: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val route: String
 )
 
 @Composable
@@ -65,8 +68,52 @@ fun MyAppNavHost(navController: NavHostController = rememberNavController()) {
         composable("questionnaire") { QuestionnaireScreen(navController) }
         composable("additionalInfo") { AdditionalInfoScreen(navController) }
         composable("main") { MainScreen(navController) }
-        composable("home") { MainActivity() }
+        composable("home") { MainScreen(navController) }
+        composable("foodCategories") { FoodCategoriesScreen(navController) }
         composable("food") { FoodScreen(navController) }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FoodScreen(navController: NavHostController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Alimentation") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFFEA5F),
+                    titleContentColor = Color.Black,
+                    navigationIconContentColor = Color.Black
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Button(
+                onClick = { navController.navigate("foodCategories") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(
+                    text = "Catégories Alimentaires",
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
@@ -74,8 +121,8 @@ fun MyAppNavHost(navController: NavHostController = rememberNavController()) {
 fun MainScreen(navController: NavHostController) {
     var selectedItem by remember { mutableStateOf(0) }
     val items = listOf(
-        NavigationItem("Home", Icons.Rounded.Home),
-        NavigationItem("Food", Icons.Rounded.RestaurantMenu)
+        NavigationItem("Home", Icons.Rounded.Home, "home"),
+        NavigationItem("Food", Icons.Rounded.RestaurantMenu, "foodCategories")
     )
 
     Scaffold(
@@ -114,9 +161,7 @@ fun MainScreen(navController: NavHostController) {
                             selected = selectedItem == index,
                             onClick = {
                                 selectedItem = index
-                                when (item.title) {
-                                    "Food" -> navController.navigate("food")
-                                }
+                                navController.navigate(item.route)
                             },
                             selectedContentColor = Color.Black,
                             unselectedContentColor = Color.DarkGray.copy(alpha = 0.7f),
@@ -135,7 +180,6 @@ fun MainScreen(navController: NavHostController) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Première Card : Bandeau "Hi Axel"
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -158,7 +202,6 @@ fun MainScreen(navController: NavHostController) {
                     }
                 }
 
-                // Deuxième Card : Calories
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -182,7 +225,6 @@ fun MainScreen(navController: NavHostController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Troisième Card : Add Poids
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -222,7 +264,6 @@ fun MainScreen(navController: NavHostController) {
                     }
                 }
 
-                // Quatrième Card : Macronutriments
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -293,7 +334,6 @@ fun MainScreen(navController: NavHostController) {
     }
 }
 
-// Extension pour vérifier si c'est le premier lancement
 fun Context.isFirstLaunch(): Boolean {
     val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     val isFirstLaunch = sharedPreferences.getBoolean("is_first_launch", true)

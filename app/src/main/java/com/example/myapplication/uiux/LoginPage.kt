@@ -109,7 +109,7 @@ fun LoginPage(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    if (email == "a" && password == "a") {
+                    if (email == "test" && password == "test") {
                         navController.navigate("questionnaire")
                     }
                 },
