@@ -17,11 +17,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.myapplication.repository.UserRepository
 
 @Composable
 fun LoginPage(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val userRepository = UserRepository()
 
     Box(
         modifier = Modifier
@@ -109,8 +112,12 @@ fun LoginPage(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    if (email == "a" && password == "a") {
-                        navController.navigate("questionnaire")
+                    userRepository.login(email, password) { success, token: String? ->
+                        if (success) {
+                            navController.navigate("questionnaire")
+                        } else {
+                            errorMessage = "Login failed"
+                        }
                     }
                 },
                 modifier = Modifier
@@ -125,6 +132,11 @@ fun LoginPage(navController: NavHostController) {
                 )
             ) {
                 Text("Login")
+            }
+
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
         }
     }

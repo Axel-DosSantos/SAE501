@@ -135,7 +135,7 @@ fun MainScreen(navController: NavHostController, userName: String) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Première Card : Bandeau "Hi Axel"
+                // Première Card : Bandeau "Hi $username"
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
