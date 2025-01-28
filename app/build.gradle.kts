@@ -84,7 +84,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
     implementation ("io.coil-kt:coil-compose:2.2.2")
-
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
 
     // Test dependencies
     testImplementation(libs.junit)

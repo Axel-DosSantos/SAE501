@@ -1,11 +1,7 @@
-package com.example.myapplication.model  // Le même package que les autres modèles
+package com.example.myapplication.model
 
-import com.example.myapplication.model.FoodCategory
-
-// Classe représentant un élément de catégorie alimentaire.
 data class FoodCategoryItem(
-
-    val category: FoodCategory,   // Catégorie d'aliment (ex : Protéines, Produits Laitiers, etc.)
-    val title: String,            // Le titre à afficher pour cette catégorie (ex : "Protéines")
-    val icon: String? = null      // Une icône optionnelle pour la catégorie (ex : une icône d'image)
+    val category: FoodCategory,
+    val title: String,
+    val icon: String? = null
 )

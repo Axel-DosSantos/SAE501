@@ -4,9 +4,11 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.model.FoodCategory
-import com.example.myapplication.model.FoodCategoryItem
 import com.example.myapplication.model.FoodItem
-import com.example.myapplication.network.RetrofitInstance
+import com.example.myapplication.network.ProteinsResponse
+import com.example.myapplication.network.FoodResponse
+import RetrofitInstance
+import com.example.myapplication.model.FoodCategoryItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +27,6 @@ class FoodCategoriesScreenViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
-    // Liste des catégories disponibles
     private val categories = listOf(
         FoodCategoryItem(FoodCategory.PROTEINS, "Protéines"),
         FoodCategoryItem(FoodCategory.DAIRY, "Produits Laitiers"),
@@ -36,7 +37,6 @@ class FoodCategoriesScreenViewModel : ViewModel() {
         FoodCategoryItem(FoodCategory.BEVERAGES, "Boissons")
     )
 
-    // Fonction pour charger les éléments en fonction de la catégorie sélectionnée
     fun loadFoodItems(category: FoodCategory) {
         viewModelScope.launch {
             try {
@@ -44,22 +44,38 @@ class FoodCategoriesScreenViewModel : ViewModel() {
                 _error.value = null
                 _selectedCategory.value = category
 
-                // Récupérer les données via Retrofit selon la catégorie
-                val response = when (category) {
-                    FoodCategory.PROTEINS -> RetrofitInstance.api.getProteins()
+                // Appel API en fonction de la catégorie
+                val foodItemsList = when (category) {
+                    FoodCategory.PROTEINS -> {
+                        // Assurer que nous avons bien une liste valide
+                        val response = RetrofitInstance.api.getProteins()
+                        response.openFoodFacts ?: emptyList() // Utilisation correcte sans 'flatten'
+                    }
                     FoodCategory.DAIRY -> RetrofitInstance.api.getDairyProducts()
                     FoodCategory.SWEET_PRODUCTS -> RetrofitInstance.api.getSweetProducts()
                     FoodCategory.FATS -> RetrofitInstance.api.getFatsProducts()
                     FoodCategory.STARCHY_FOODS -> RetrofitInstance.api.getStarchyFoods()
                     FoodCategory.CONDIMENTS -> RetrofitInstance.api.getCondiments()
                     FoodCategory.BEVERAGES -> RetrofitInstance.api.getBeverages()
+                    else -> emptyList()
                 }
 
-                // Aplatir la liste des éléments et gérer les images
-                val flattenedList = response.openFoodFacts?.map { item ->
-                    item.copy(imageUrl = item.selected_images?.front?.display?.get("fr"))
-                } ?: emptyList()
-                _foodItems.value = flattenedList
+                // Traitement des éléments reçus
+                _foodItems.value = foodItemsList.mapNotNull { item ->
+                    if (item.product_name.isNullOrBlank()) {
+                        null
+                    } else {
+                        item.copy(
+                            imageUrl = item.selected_images?.front?.display?.get("fr"),
+                            product_name = item.product_name.trim()
+                        )
+                    }
+                }
+
+                // Vérifier si la liste est vide
+                if (_foodItems.value.isEmpty()) {
+                    _error.value = "Aucun produit trouvé pour cette catégorie."
+                }
 
             } catch (e: Exception) {
                 Log.e("FoodCategoriesScreen", "Error loading food items: ${e.message}", e)
@@ -70,6 +86,5 @@ class FoodCategoriesScreenViewModel : ViewModel() {
         }
     }
 
-    // Retourne toutes les catégories
     fun getAllCategories() = categories
 }

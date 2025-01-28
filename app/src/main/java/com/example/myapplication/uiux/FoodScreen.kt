@@ -1,15 +1,13 @@
+// FoodCategoriesScreen.kt
 package com.example.myapplication.uiux
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -22,16 +20,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
-import com.example.myapplication.model.FoodCategoryItem
-import com.example.myapplication.model.FoodItem
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.model.FoodCategory
+import com.example.myapplication.model.FoodCategoryItem
+import com.example.myapplication.model.FoodItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodCategoriesScreen(
     navController: NavHostController,
-    viewModel: FoodCategoriesScreenViewModel = viewModel() // Utilisation de viewModel() pour initialisation correcte
+    viewModel: FoodCategoriesScreenViewModel = viewModel()
 ) {
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val foodItems by viewModel.foodItems.collectAsState()
@@ -61,7 +59,6 @@ fun FoodCategoriesScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Affichage des catégories sous forme de LazyRow avec LazyVerticalGrid à l'intérieur
             LazyRow(
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -82,7 +79,6 @@ fun FoodCategoriesScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Affichage des éléments de la catégorie sélectionnée
             selectedCategory?.let { _ ->
                 when {
                     isLoading -> {
@@ -105,9 +101,9 @@ fun FoodCategoriesScreen(
                         )
                     }
                     else -> {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(16.dp)
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp) // Ajouter de l'espace vertical entre les cartes
                         ) {
                             items(foodItems) { foodItem ->
                                 FoodItemDetailCard(foodItem)
@@ -125,15 +121,16 @@ fun FoodItemDetailCard(foodItem: FoodItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .padding(8.dp), // Ajouter du padding pour séparer les cartes
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start
         ) {
+            // Afficher l'image si disponible
             foodItem.imageUrl?.let {
                 Image(
                     painter = rememberImagePainter(data = it),
@@ -141,10 +138,55 @@ fun FoodItemDetailCard(foodItem: FoodItem) {
                     modifier = Modifier
                         .size(80.dp)
                         .clip(CircleShape)
+                        .align(Alignment.CenterHorizontally)
                 )
+                Spacer(modifier = Modifier.height(8.dp))
             }
+
+            // Afficher le nom du produit
+            Text(
+                text = foodItem.product_name,
+                maxLines = 2,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(foodItem.product_name, maxLines = 2)
+
+            // Afficher les valeurs nutritionnelles négatives en excluant "non_nutritive_sweeteners"
+            foodItem.nutriscore_data?.components?.negative?.filter { it.id != "non_nutritive_sweeteners" }?.let { negativeComponents ->
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    negativeComponents.forEach { component ->
+                        Text(
+                            text = "${component.id.capitalize()}: ${component.value} ${component.id}",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Afficher les valeurs nutritionnelles positives en excluant "fruits_vegetables_legumes"
+            foodItem.nutriscore_data?.components?.positive?.filter { it.id != "fruits_vegetables_legumes" }?.let { positiveComponents ->
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    positiveComponents.forEach { component ->
+                        Text(
+                            text = "${component.id.capitalize()}: ${component.value} ${component.id}",
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Start
+                        )
+                    }
+                }
+            }
         }
     }
 }

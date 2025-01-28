@@ -1,3 +1,4 @@
+// FoodCategory.kt
 package com.example.myapplication.model
 
 enum class FoodCategory {
