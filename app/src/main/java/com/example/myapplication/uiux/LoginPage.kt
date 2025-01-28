@@ -17,62 +17,43 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.myapplication.repository.UserRepository
 
 @Composable
 fun LoginPage(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val userRepository = UserRepository()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFEA5F))
+            .background(Color.White)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxHeight()
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "ASCENDANT",
-                fontSize = 40.sp,
+                text = "Login",
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                modifier = Modifier.padding(bottom = 220.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-
-            Spacer(modifier = Modifier.height(100.dp))
 
             BasicTextField(
                 value = email,
                 onValueChange = { email = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .background(Color.White, RoundedCornerShape(50.dp))
-                    .padding(10.dp),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
-                singleLine = true,
-                decorationBox = { innerTextField ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White, RoundedCornerShape(50.dp))
-                            .padding(10.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (email.isEmpty()) {
-                            Text(
-                                text = "Adresse e-mail",
-                                color = Color.Gray,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                        innerTextField()
-                    }
-                }
+                    .padding(bottom = 8.dp)
+                    .background(Color.LightGray, RoundedCornerShape(8.dp))
+                    .padding(8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true
             )
 
             BasicTextField(
@@ -80,51 +61,34 @@ fun LoginPage(navController: NavHostController) {
                 onValueChange = { password = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(50.dp))
-                    .padding(10.dp),
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                    .padding(bottom = 8.dp)
+                    .background(Color.LightGray, RoundedCornerShape(8.dp))
+                    .padding(8.dp),
                 visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                decorationBox = { innerTextField ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White, RoundedCornerShape(50.dp))
-                            .padding(10.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (password.isEmpty()) {
-                            Text(
-                                text = "Mot de passe",
-                                color = Color.Gray,
-                                modifier = Modifier.padding(start = 10.dp)
-                            )
-                        }
-                        innerTextField()
-                    }
-                }
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
-                    if (email == "test" && password == "test") {
-                        navController.navigate("questionnaire")
+                    userRepository.login(email, password) { success, token: String? ->
+                        if (success) {
+                            navController.navigate("questionnaire")
+                        } else {
+                            errorMessage = "Login failed"
+                        }
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
-                    .background(Color.White, RoundedCornerShape(50.dp))
-                    .padding(10.dp),
-                shape = RoundedCornerShape(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                )
             ) {
                 Text("Login")
+            }
+
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
         }
     }

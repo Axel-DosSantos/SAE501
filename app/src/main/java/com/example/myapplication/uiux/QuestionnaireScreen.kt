@@ -15,10 +15,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myapplication.model.UserViewModel
 
 @Composable
-fun QuestionnaireScreen(navController: NavHostController) {
+fun QuestionnaireScreen(navController: NavHostController, userViewModel: UserViewModel = viewModel()) {
     var name by remember { mutableStateOf("") }
     var selectedOption by remember { mutableStateOf("") }
     var isNameValid by remember { mutableStateOf(false) }
@@ -184,6 +186,7 @@ fun QuestionnaireScreen(navController: NavHostController) {
             onClick = {
                 if (isNameValid && isOptionSelected) {
                     // Vous pouvez stocker les réponses ici si nécessaire
+                    userViewModel.userName = name
                     navController.navigate("additionalInfo")
                 }
             },

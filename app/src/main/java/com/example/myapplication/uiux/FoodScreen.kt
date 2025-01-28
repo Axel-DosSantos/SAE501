@@ -1,4 +1,3 @@
-// FoodCategoriesScreen.kt
 package com.example.myapplication.uiux
 
 import androidx.compose.foundation.Image
@@ -27,7 +26,7 @@ import com.example.myapplication.model.FoodItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FoodCategoriesScreen(
+fun FoodScreen(
     navController: NavHostController,
     viewModel: FoodCategoriesScreenViewModel = viewModel()
 ) {

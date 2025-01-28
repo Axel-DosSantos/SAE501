@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.RestaurantMenu
@@ -24,7 +23,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -32,9 +30,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.model.UserViewModel
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.uiux.*
-import androidx.compose.material3.ExperimentalMaterial3Api
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,77 +53,30 @@ class MainActivity : ComponentActivity() {
 
 data class NavigationItem(
     val title: String,
-    val icon: ImageVector,
-    val route: String
+    val icon: ImageVector
 )
 
 @Composable
-fun MyAppNavHost(navController: NavHostController = rememberNavController()) {
+fun MyAppNavHost(navController: NavHostController = rememberNavController(), userViewModel: UserViewModel = viewModel()) {
     val context = LocalContext.current
     val isFirstLaunch = remember { context.isFirstLaunch() }
-
     NavHost(navController, startDestination = if (isFirstLaunch) "login" else "main") {
         composable("login") { LoginPage(navController) }
-        composable("questionnaire") { QuestionnaireScreen(navController) }
+        composable("questionnaire") { QuestionnaireScreen(navController, userViewModel) }
         composable("additionalInfo") { AdditionalInfoScreen(navController) }
-        composable("main") { MainScreen(navController) }
-        composable("home") { MainScreen(navController) }
-        composable("foodCategories") { FoodCategoriesScreen(navController) }
-        composable("food") { FoodScreen(navController) }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FoodScreen(navController: NavHostController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Alimentation") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFFEA5F),
-                    titleContentColor = Color.Black,
-                    navigationIconContentColor = Color.Black
-                )
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = { navController.navigate("foodCategories") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text(
-                    text = "Catégories Alimentaires",
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        composable("main") { MainScreen(navController, userViewModel.userName) }
+        composable("home") { MainActivity() }
+        composable("Food") { FoodScreen(navController) }
     }
 }
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, userName: String) {
     var selectedItem by remember { mutableStateOf(0) }
     val items = listOf(
-        NavigationItem("Home", Icons.Rounded.Home, "home"),
-        NavigationItem("Food", Icons.Rounded.RestaurantMenu, "foodCategories")
+        NavigationItem("Home", Icons.Rounded.Home),
+        NavigationItem("Food", Icons.Rounded.RestaurantMenu)
     )
-
     Scaffold(
         bottomBar = {
             Box(
@@ -161,7 +113,9 @@ fun MainScreen(navController: NavHostController) {
                             selected = selectedItem == index,
                             onClick = {
                                 selectedItem = index
-                                navController.navigate(item.route)
+                                when (item.title) {
+                                    "Food" -> navController.navigate("food")
+                                }
                             },
                             selectedContentColor = Color.Black,
                             unselectedContentColor = Color.DarkGray.copy(alpha = 0.7f),
@@ -180,6 +134,7 @@ fun MainScreen(navController: NavHostController) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Première Card : Bandeau "Hi Axel"
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -193,7 +148,7 @@ fun MainScreen(navController: NavHostController) {
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            text = "Hi Axel",
+                            text = "Hi $userName",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
@@ -201,7 +156,7 @@ fun MainScreen(navController: NavHostController) {
                         )
                     }
                 }
-
+                // Deuxième Card : Calories
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -222,9 +177,8 @@ fun MainScreen(navController: NavHostController) {
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
+                // Troisième Card : Add Poids
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -241,7 +195,6 @@ fun MainScreen(navController: NavHostController) {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-
                         Box(
                             modifier = Modifier
                                 .size(50.dp)
@@ -263,7 +216,7 @@ fun MainScreen(navController: NavHostController) {
                         }
                     }
                 }
-
+                // Quatrième Card : Macronutriments
                 Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -280,7 +233,6 @@ fun MainScreen(navController: NavHostController) {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-
                         Text(
                             text = "Protéines",
                             fontSize = 14.sp,
@@ -296,7 +248,6 @@ fun MainScreen(navController: NavHostController) {
                                 .height(16.dp)
                                 .padding(bottom = 8.dp)
                         )
-
                         Text(
                             text = "Lipides",
                             fontSize = 14.sp,
@@ -312,7 +263,6 @@ fun MainScreen(navController: NavHostController) {
                                 .height(16.dp)
                                 .padding(bottom = 8.dp)
                         )
-
                         Text(
                             text = "Glucides",
                             fontSize = 14.sp,
@@ -334,6 +284,7 @@ fun MainScreen(navController: NavHostController) {
     }
 }
 
+// Extension pour vérifier si c'est le premier lancement
 fun Context.isFirstLaunch(): Boolean {
     val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     val isFirstLaunch = sharedPreferences.getBoolean("is_first_launch", true)
@@ -341,4 +292,15 @@ fun Context.isFirstLaunch(): Boolean {
         sharedPreferences.edit().putBoolean("is_first_launch", false).apply()
     }
     return isFirstLaunch
+}
+
+// Affichage dynamique du nom de l'utilisateur
+fun Context.saveUserName(userName: String) {
+    val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    sharedPreferences.edit().putString("user_name", userName).apply()
+}
+
+fun Context.getUserName(): String {
+    val sharedPreferences = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    return sharedPreferences.getString("user_name", "") ?: ""
 }
